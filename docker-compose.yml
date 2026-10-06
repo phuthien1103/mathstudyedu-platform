@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: openedu_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: openedu_user
+      POSTGRES_PASSWORD: openedu_secure_password
+      POSTGRES_DB: openedu_lms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - openedu_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: openedu_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - openedu_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  openedu_network:
+    driver: bridge
