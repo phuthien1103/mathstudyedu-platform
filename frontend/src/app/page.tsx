@@ -43,7 +43,7 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         // Tải danh sách tất cả các khóa học
-        const resCourses = await fetch('http://localhost:5000/api/courses', {
+        const resCourses = await fetch('https://mathstudyedu-api.onrender.com/api/courses', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -55,7 +55,7 @@ export default function HomePage() {
         }
 
         // Tải danh sách ghi danh của người dùng hiện tại
-        const resEnroll = await fetch('http://localhost:5000/api/enrollments/my', {
+        const resEnroll = await fetch('https://mathstudyedu-api.onrender.com/api/enrollments/my', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -94,7 +94,7 @@ export default function HomePage() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/enrollments', {
+      const res = await fetch('https://mathstudyedu-api.onrender.com/api/enrollments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

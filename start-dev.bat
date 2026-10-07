@@ -24,7 +24,7 @@ start "OpenEdu - Prisma Studio" cmd /k "cd /d D:\WEBSITE\backend && npx prisma s
 
 echo ======================================================
 echo    DA KHOI DONG THANH CONG CAC DICH VU!
-echo    - Backend API : http://localhost:5000
+echo    - Backend API : https://mathstudyedu-api.onrender.com/api
 echo    - Prisma Studio: http://localhost:5555
 echo ======================================================
 pause
