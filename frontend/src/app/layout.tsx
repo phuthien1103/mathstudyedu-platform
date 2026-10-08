@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ContactWidget from '@/components/ContactWidget';
+import Sidebar from '@/components/Sidebar';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +25,11 @@ return (
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        {children}
+      <body className="min-h-screen bg-[#0b1120] flex text-white">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+          {children}
+        </div>
         <ContactWidget />
       </body>
     </html>
