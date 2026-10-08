@@ -1,25 +1,99 @@
+'use client';
+
 import Link from 'next/link';
 
 export default function ContactWidget() {
   return (
-    <div className="fixed bottom-6 right-6 flex flex-col gap-4 z-50">
-      {/* Nút Email với hiệu ứng nhịp đập (pulse) */}
-      <Link href="mailto:meocon110307@gmail.com" 
-            className="group flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:scale-110 transition-all duration-300 animate-pulse">
-        📧
-        <span className="absolute right-14 whitespace-nowrap opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-sm px-3 py-1 rounded-md transition-opacity">
-          meocon110307@gmail.com
-        </span>
-      </Link>
+    <>
+      {/* 
+        Đoạn CSS nhúng này giúp tạo hiệu ứng nổi 3D (inset shadow), 
+        bóng đổ cho icon và các vòng sóng radar (sonar) giống hệt thiết kế.
+      */}
+      <style jsx>{`
+        .btn-3d-glass {
+          box-shadow: inset 0px 4px 6px rgba(255, 255, 255, 0.5), 
+                      inset 0px -6px 12px rgba(0, 0, 0, 0.4), 
+                      0px 10px 25px rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(10px);
+        }
+        .icon-shadow {
+          filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.5));
+        }
+        @keyframes radar-wave {
+          0% { transform: scale(1); opacity: 0.8; border-width: 2px; }
+          100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
+        }
+        .animate-radar-1 {
+          animation: radar-wave 2.5s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
+        }
+        .animate-radar-2 {
+          animation: radar-wave 2.5s cubic-bezier(0.1, 0.4, 0.8, 1) 1.25s infinite;
+        }
+        @keyframes phone-ring {
+          0%, 100% { transform: rotate(0deg); }
+          10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+          20%, 40%, 60%, 80% { transform: rotate(10deg); }
+        }
+        .group:hover .icon-phone {
+          animation: phone-ring 1s ease-in-out infinite;
+        }
+      `}</style>
 
-      {/* Nút SĐT với hiệu ứng nhấp nhô (bounce) */}
-      <Link href="tel:0812086107"
-            className="group flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full shadow-lg hover:scale-110 transition-all duration-300 animate-bounce">
-        📞
-        <span className="absolute right-14 whitespace-nowrap opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-sm px-3 py-1 rounded-md transition-opacity">
-          0812 086 107
-        </span>
-      </Link>
-    </div>
+      <div className="fixed bottom-8 right-8 flex flex-col gap-10 z-50 items-center">
+        
+        {/* ================= NÚT EMAIL ================= */}
+        <div className="relative group flex items-center justify-center">
+          {/* Hiệu ứng sóng radar */}
+          <div className="absolute inset-0 rounded-full border-blue-400 animate-radar-1"></div>
+          <div className="absolute inset-0 rounded-full border-indigo-400 animate-radar-2"></div>
+          <div className="absolute inset-[-20px] rounded-full bg-blue-600/10 blur-xl"></div>
+
+          {/* Khối nút bấm 3D */}
+          <Link href="mailto:meocon110307@gmail.com" 
+                className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 via-blue-600 to-indigo-900 border border-white/20 btn-3d-glass transition-transform duration-300 hover:scale-110">
+            
+            {/* Vệt sáng chéo giả kính (Glass reflection) */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 to-transparent"></div>
+            
+            {/* Icon Email 3D */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white icon-shadow relative z-10" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25a.85.85 0 1 1 .9-1.44L12 11l6.7-4.19a.85.85 0 1 1 .9 1.44z"/>
+            </svg>
+
+            {/* Chữ hiển thị khi Hover */}
+            <span className="absolute right-20 whitespace-nowrap opacity-0 group-hover:opacity-100 bg-indigo-900/80 backdrop-blur-md border border-white/10 shadow-lg text-white text-sm font-medium px-4 py-2 rounded-xl transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+              meocon110307@gmail.com
+            </span>
+          </Link>
+        </div>
+
+        {/* ================= NÚT ĐIỆN THOẠI ================= */}
+        <div className="relative group flex items-center justify-center">
+          {/* Hiệu ứng hào quang xanh lục */}
+          <div className="absolute inset-0 rounded-full border-green-300 animate-radar-1"></div>
+          <div className="absolute inset-0 rounded-full border-emerald-400 animate-radar-2"></div>
+          <div className="absolute inset-[-20px] rounded-full bg-green-500/20 blur-xl"></div>
+
+          {/* Khối nút bấm 3D */}
+          <Link href="tel:0812086107"
+                className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-300 via-green-500 to-teal-900 border border-white/20 btn-3d-glass transition-transform duration-300 hover:scale-110">
+            
+            {/* Vệt sáng chéo giả kính */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/40 to-transparent"></div>
+            
+            {/* Icon Phone 3D */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white icon-shadow icon-phone relative z-10" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .98-.66.98-1.21v-3.42c0-.54-.45-.99-.99-.99z"/>
+            </svg>
+
+            {/* Chữ hiển thị khi Hover */}
+            <span className="absolute right-20 whitespace-nowrap opacity-0 group-hover:opacity-100 bg-teal-900/80 backdrop-blur-md border border-white/10 shadow-lg text-white text-sm font-medium px-4 py-2 rounded-xl transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+              0812 086 107
+            </span>
+          </Link>
+        </div>
+
+      </div>
+    </>
   );
 }
