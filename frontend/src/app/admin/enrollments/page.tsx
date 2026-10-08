@@ -79,7 +79,7 @@ export default function AdminEnrollmentsPage() {
   const handleUpdateStatus = async (id: string, status: 'ACTIVE' | 'CANCELLED') => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const res = await fetch(`https://mathstudyedu-api.onrender.comapi/enrollments/admin/${id}/status`, {
+      const res = await fetch(`https://mathstudyedu-api.onrender.com/api/enrollments/admin/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
