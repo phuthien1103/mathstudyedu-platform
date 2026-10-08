@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, LogOut, User, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -18,7 +18,6 @@ export default function HomePage() {
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [user, setUser] = useState<{ name?: string; fullName?: string; email: string; role: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -30,12 +29,6 @@ export default function HomePage() {
     if (!token || !savedUserStr) {
       router.replace('/login');
       return;
-    }
-
-    try {
-      setUser(JSON.parse(savedUserStr));
-    } catch (e) {
-      console.error('Lỗi đọc user:', e);
     }
 
     setIsAuthorized(true);
@@ -61,7 +54,6 @@ export default function HomePage() {
 
         if (resEnroll.ok) {
           const enrollData = await resEnroll.json();
-          console.log('Dữ liệu ghi danh của tôi:', enrollData);
           const items = Array.isArray(enrollData) ? enrollData : (enrollData.data || []);
           setEnrollments(items);
         }
@@ -75,15 +67,7 @@ export default function HomePage() {
     fetchData();
   }, [router]);
 
-  // 2. Đăng xuất
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    router.replace('/login');
-  };
-
-  // 3. Đăng ký môn học
+  // 2. Đăng ký môn học
   const handleEnroll = async (courseId: string) => {
     const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
 
@@ -111,7 +95,6 @@ export default function HomePage() {
       }
 
       alert('Đăng ký môn học thành công! Đang chờ Admin xét duyệt.');
-      // Thêm ngay vào state để cập nhật giao diện
       setEnrollments((prev) => [...prev, { courseId, status: 'PENDING' }]);
     } catch (err) {
       console.error(err);
@@ -129,49 +112,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-7 w-7 text-blue-500" />
-            <span className="text-xl font-bold tracking-tight text-white">OpenEdu</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-sm text-slate-300">
-              <User className="h-4 w-4 text-blue-400" />
-              <span>{user?.fullName || user?.name || user?.email}</span>
-              {user?.role && (
-                <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400 border border-blue-500/20 font-mono">
-                  {user.role}
-                </span>
-              )}
-            </div>
-
-            {user?.role === 'ADMIN' && (
-              <button
-                onClick={() => router.push('/admin/enrollments')}
-                className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-600/20 px-3.5 py-1.5 text-sm font-semibold text-emerald-400 hover:bg-emerald-600/30 transition-colors"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                <span>Duyệt ghi danh</span>
-              </button>
-            )}
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-sm font-medium hover:bg-slate-700 hover:text-white transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Đăng xuất</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
       {/* Danh sách khóa học */}
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main className="mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">Khóa học của bạn</h1>
           <p className="mt-1 text-sm text-slate-400">Chọn khóa học để bắt đầu lộ trình học tập và làm bài trắc nghiệm</p>
@@ -189,7 +132,6 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((course) => {
-              // So khớp cả courseId trực tiếp hoặc course.id lồng nhau
               const currentEnrollment = enrollments.find(
                 (e: any) => e.courseId === course.id || e.course?.id === course.id
               );
@@ -234,7 +176,6 @@ export default function HomePage() {
                       </span>
                     </div>
 
-                    {/* Kiểm tra và hiển thị nút theo trạng thái duyệt */}
                     {currentEnrollment?.status === 'ACTIVE' ? (
                       <button
                         disabled
