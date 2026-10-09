@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, ExternalLink, BookOpen, Search } from 'lucide-react';
+import { FileText, Download, Search } from 'lucide-react';
 
 interface DocumentItem {
   id: string;
@@ -26,42 +26,44 @@ export default function DocumentsPage() {
       return;
     }
 
-    // Tạm thời khởi tạo danh sách tài liệu mẫu phong phú để giao diện sinh động, 
-    // bạn có thể thay thế bằng API fetch từ backend khi sẵn sàng.
-    const mockDocuments: DocumentItem[] = [
-      {
-        id: '1',
-        title: 'Tổng hợp công thức Giải tích 12 luyện thi THPT',
-        description: 'Hệ thống đầy đủ công thức đạo hàm, tích phân, số phức và hình học không gian.',
-        fileUrl: '#',
-        category: 'Đề thi & Tài liệu',
-        createdAt: '2026-10-01',
-      },
-      {
-        id: '2',
-        title: 'Bộ đề thi thử môn Toán tốt nghiệp THPT chuẩn cấu trúc',
-        description: '15 đề thi thử có đáp án chi tiết và hướng dẫn giải từng câu trắc nghiệm.',
-        fileUrl: '#',
-        category: 'Đề thi',
-        createdAt: '2026-09-25',
-      },
-      {
-        id: '3',
-        title: 'Slide bài giảng Hình học không gian nâng cao',
-        description: 'Tài liệu độc quyền dành cho học viên khóa Nền tảng đến nâng cao.',
-        fileUrl: '#',
-        category: 'Tài liệu bài giảng',
-        createdAt: '2026-09-20',
-      },
-    ];
+    const fetchDocuments = async () => {
+      try {
+        // Gọi API lấy danh sách tài liệu từ Backend của bạn
+        // (Đảm bảo backend đã có route GET /api/documents)
+        const res = await fetch('https://mathstudyedu-api.onrender.com/api/documents', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    setDocuments(mockDocuments);
-    setLoading(false);
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (data.data || data.documents || []);
+          setDocuments(items);
+        } else {
+          // Fallback dữ liệu mẫu nếu API chưa sẵn sàng
+          setDocuments([
+            {
+              id: '1',
+              title: 'Tổng hợp công thức Giải tích 12 luyện thi THPT',
+              description: 'Hệ thống đầy đủ công thức đạo hàm, tích phân, số phức và hình học không gian.',
+              fileUrl: 'https://drive.google.com/', // Link Google Drive của bạn
+              category: 'Đề thi & Tài liệu',
+              createdAt: '2026-10-01',
+            }
+          ]);
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải tài liệu:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocuments();
   }, [router]);
 
   const filteredDocs = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.description.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -71,7 +73,7 @@ export default function DocumentsPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white sm:text-3xl">Tài liệu & Đề thi</h1>
-            <p className="mt-1 text-sm text-slate-400">Kho tàng tài liệu, slide học tập và đề thi thử được cập nhật liên tục</p>
+            <p className="mt-1 text-sm text-slate-400">Kho tàng tài liệu, slide học tập và đề thi thử từ Google Drive</p>
           </div>
 
           {/* Ô tìm kiếm nhanh */}
@@ -108,28 +110,32 @@ export default function DocumentsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-400 border border-blue-500/20">
                       <FileText className="h-3.5 w-3.5" />
-                      {doc.category}
+                      {doc.category || 'Tài liệu'}
                     </span>
-                    <span className="text-xs text-slate-500">{doc.createdAt}</span>
+                    <span className="text-xs text-slate-500">
+                      {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('vi-VN') : ''}
+                    </span>
                   </div>
 
                   <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-2">
                     {doc.title}
                   </h3>
                   <p className="mt-2 text-sm text-slate-400 line-clamp-3">
-                    {doc.description}
+                    {doc.description || 'Chưa có mô tả chi tiết.'}
                   </p>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Định dạng: PDF / Docx</span>
-                  <button
-                    onClick={() => alert('Đang tải xuống tài liệu...')}
+                  <span className="text-xs text-slate-500">Lưu trữ: Google Drive</span>
+                  <a
+                    href={doc.fileUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Tải về</span>
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}
