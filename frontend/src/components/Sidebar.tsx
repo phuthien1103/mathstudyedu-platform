@@ -9,11 +9,6 @@ export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // Nếu đang ở trang đăng nhập thì ẩn hoàn toàn Sidebar và Bottom Nav
-  if (pathname === '/login') {
-    return null;
-  }
-
   useEffect(() => {
     try {
       const savedUserStr = localStorage.getItem('user');
@@ -25,6 +20,11 @@ export default function Sidebar() {
       console.error('Lỗi đọc user từ localStorage:', e);
     }
   }, []);
+
+  // Nếu đang ở trang đăng nhập thì không render Sidebar và Bottom Nav
+  if (pathname === '/login') {
+    return null;
+  }
 
   const menuItems = [
     {
@@ -54,7 +54,6 @@ export default function Sidebar() {
         </svg>
       )
     },
-    // Nếu là ADMIN thì hiển thị thêm mục Duyệt ghi danh
     ...(userRole === 'ADMIN' ? [{
       name: 'Duyệt ghi danh',
       href: '/admin/enrollments',
@@ -131,7 +130,7 @@ export default function Sidebar() {
          </div>
       </div>
 
-      {/* Thanh menu dưới dành riêng cho điện thoại (Mobile Bottom Nav) */}
+      {/* Thanh menu dưới dành riêng cho điện thoại */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#0d1526] border-t border-gray-800 flex items-center justify-around px-2 z-50 md:hidden shadow-lg">
         <Link href="/" className={`flex flex-col items-center justify-center ${pathname === '/' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
