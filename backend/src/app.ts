@@ -11,7 +11,7 @@ import categoryRoutes from './routes/category.routes.js';
 import quizRoutes from './routes/quiz.routes.js';
 import path from 'path';
 import uploadRoutes from './routes/upload.routes.js';
-
+import documentRoutes from './routes/document.routes.js';
 dotenv.config();
 
 const app: Application = express();
@@ -46,6 +46,7 @@ app.use('/api/upload', uploadRoutes);
 // Định tuyến API
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/documents', documentRoutes);
 
 app.get('/api/health', async (_req: Request, res: Response) => {
   try {
