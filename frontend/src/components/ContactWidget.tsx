@@ -37,7 +37,7 @@ export default function ContactWidget() {
       `}</style>
 
       {/* Đã giảm khoảng cách (gap) xuống gap-4 và vị trí góc bottom-6 right-6 */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-4 z-50 items-center">
+      <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 flex flex-col gap-3 z-50 items-center">
         
         {/* ================= NÚT EMAIL ================= */}
         <div className="relative group flex items-center justify-center">
