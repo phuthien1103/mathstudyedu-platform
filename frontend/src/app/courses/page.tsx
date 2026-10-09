@@ -93,7 +93,7 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
+    <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-8 pb-24">
       <main className="mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">Khóa học hiện có</h1>
