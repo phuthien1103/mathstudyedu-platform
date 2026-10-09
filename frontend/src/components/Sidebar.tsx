@@ -9,6 +9,11 @@ export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  // Nếu đang ở trang đăng nhập thì ẩn hoàn toàn Sidebar và Bottom Nav
+  if (pathname === '/login') {
+    return null;
+  }
+
   useEffect(() => {
     try {
       const savedUserStr = localStorage.getItem('user');
