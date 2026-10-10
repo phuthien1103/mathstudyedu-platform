@@ -8,8 +8,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [userData, setUserData] = useState<{ fullName?: string; name?: string; email?: string; phone?: string; password?: string }>({});
+  const [userData, setUserData] = useState<{ fullName?: string; name?: string; email?: string; phone?: string; id?: string }>({});
   const [showAccountModal, setShowAccountModal] = useState(false);
+  
+  // State quản lý form đổi mật khẩu
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loadingChangePwd, setLoadingChangePwd] = useState(false);
 
   useEffect(() => {
     try {
@@ -30,6 +37,46 @@ export default function Sidebar() {
       setUserRole(null);
     }
   }, []);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
+      return;
+    }
+
+    if (!oldPassword || !newPassword) {
+      alert('Vui lòng điền đầy đủ thông tin mật khẩu cũ và mới.');
+      return;
+    }
+
+    setLoadingChangePwd(true);
+    try {
+      const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
+      const res = await fetch('https://mathstudyedu-api.onrender.com/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+        sessionStorage.clear();
+        window.location.href = '/login';
+      } else {
+        alert(data.message || 'Đổi mật khẩu thất bại, vui lòng kiểm tra lại mật khẩu cũ.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Không thể kết nối đến máy chủ.');
+    } finally {
+      setLoadingChangePwd(false);
+    }
+  };
 
   if (pathname === '/login') {
     return null;
@@ -125,11 +172,12 @@ export default function Sidebar() {
           })}
         </div>
 
-         {/* Phần tài khoản & đăng xuất đặt ở cuối Sidebar */}
          <div className="mt-auto mb-6 px-3 flex flex-col gap-2">
-            {/* Nút Tài khoản */}
             <button 
-              onClick={() => setShowAccountModal(true)}
+              onClick={() => {
+                setIsChangingPassword(false);
+                setShowAccountModal(true);
+              }}
               className="w-full flex items-center h-12 px-3 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 group text-left"
               title={!isHovered ? 'Tài khoản' : ''}
             >
@@ -143,7 +191,6 @@ export default function Sidebar() {
                 </span>
             </button>
 
-            {/* Nút Đăng xuất */}
             <Link 
               className="flex items-center h-12 px-3 rounded-xl text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 group" 
               href="/login"
@@ -166,7 +213,7 @@ export default function Sidebar() {
          </div>
       </div>
 
-      {/* Modal hiển thị thông tin tài khoản */}
+      {/* Modal thông tin tài khoản & đổi mật khẩu */}
       {showAccountModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
@@ -175,7 +222,7 @@ export default function Sidebar() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Thông tin tài khoản
+                {isChangingPassword ? 'Đổi mật khẩu' : 'Thông tin tài khoản'}
               </h3>
               <button 
                 onClick={() => setShowAccountModal(false)}
@@ -185,47 +232,107 @@ export default function Sidebar() {
               </button>
             </div>
 
-            <div className="space-y-4 text-sm">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Họ và tên</label>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
-                  {userData.fullName || userData.name || 'Học viên'}
+            {!isChangingPassword ? (
+              <div className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Họ và tên</label>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
+                    {userData.fullName || userData.name || 'Học viên'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Email</label>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
+                    {userData.email || 'Chưa cập nhật'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại</label>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
+                    {userData.phone || 'Chưa cập nhật'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mật khẩu</label>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 flex items-center justify-between">
+                    <span>••••••••••••</span>
+                    <button 
+                      onClick={() => setIsChangingPassword(true)}
+                      className="text-xs text-blue-600 font-semibold hover:underline"
+                    >
+                      Đổi mật khẩu
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-3 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => setShowAccountModal(false)}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-colors shadow-sm"
+                  >
+                    Đóng
+                  </button>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Email</label>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
-                  {userData.email || 'Chưa cập nhật'}
+            ) : (
+              <form onSubmit={handleChangePassword} className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mật khẩu cũ</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Nhập mật khẩu hiện tại"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại</label>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
-                  {userData.phone || 'Chưa cập nhật'}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mật khẩu mới</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Nhập mật khẩu mới"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mật khẩu</label>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 flex items-center justify-between">
-                  <span>••••••••••••</span>
-                  <span className="text-xs text-blue-600 font-semibold cursor-pointer hover:underline" onClick={() => alert('Tính năng đổi mật khẩu đang được phát triển!')}>
-                    Đổi mật khẩu
-                  </span>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Xác nhận mật khẩu mới</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Nhập lại mật khẩu mới"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              </div>
-            </div>
 
-            <div className="mt-6 pt-3 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowAccountModal(false)}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-colors shadow-sm"
-              >
-                Đóng
-              </button>
-            </div>
+                <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPassword(false)}
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition-colors"
+                  >
+                    Quay lại
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loadingChangePwd}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {loadingChangePwd ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
