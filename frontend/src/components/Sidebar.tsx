@@ -14,10 +14,18 @@ export default function Sidebar() {
       const savedUserStr = localStorage.getItem('user');
       if (savedUserStr) {
         const userObj = JSON.parse(savedUserStr);
-        setUserRole(userObj.role);
+        // Kiểm tra chặt chẽ: chỉ khi role đúng là ADMIN mới set quyền, nếu không gán là null
+        if (userObj && userObj.role === 'ADMIN') {
+          setUserRole('ADMIN');
+        } else {
+          setUserRole(null);
+        }
+      } else {
+        setUserRole(null);
       }
     } catch (e) {
       console.error('Lỗi đọc user từ localStorage:', e);
+      setUserRole(null);
     }
   }, []);
 
