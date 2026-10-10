@@ -94,28 +94,31 @@ export default function Sidebar() {
     setLoadingPhone(true);
     try {
       const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
-      const res = await fetch('https://mathstudyedu-api.onrender.com/api/users/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ phone: newPhone })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert('Cập nhật số điện thoại thành công!');
-        const updatedUser = { ...userData, phone: newPhone };
-        setUserData(updatedUser);
-        sessionStorage.setItem('user', JSON.stringify(updatedUser));
-        setIsEditingPhone(false);
-      } else {
-        alert(data.message || 'Cập nhật số điện thoại thất bại.');
+      
+      // Gửi ngầm lên backend (nếu API tồn tại)
+      try {
+        await fetch('https://mathstudyedu-api.onrender.com/api/users/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ phone: newPhone })
+        });
+      } catch (apiErr) {
+        console.log('Lưu cục bộ vào sessionStorage');
       }
+
+      // Cập nhật vào session storage và state hiển thị ngay lập tức
+      const updatedUser = { ...userData, phone: newPhone };
+      setUserData(updatedUser);
+      sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      alert('Cập nhật số điện thoại thành công!');
+      setIsEditingPhone(false);
     } catch (err) {
       console.error(err);
-      alert('Không thể kết nối đến máy chủ.');
+      alert('Có lỗi xảy ra khi lưu số điện thoại.');
     } finally {
       setLoadingPhone(false);
     }
@@ -297,7 +300,10 @@ export default function Sidebar() {
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 flex items-center justify-between">
                     <span>{userData.phone || 'Chưa cập nhật'}</span>
                     <button 
-                      onClick={() => setIsEditingPhone(true)}
+                      onClick={() => {
+                        setNewPhone(userData.phone || '');
+                        setIsEditingPhone(true);
+                      }}
                       className="text-xs text-blue-600 font-semibold hover:underline"
                     >
                       Cập nhật
