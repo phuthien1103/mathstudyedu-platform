@@ -14,8 +14,8 @@ export default function Sidebar() {
       const savedUserStr = sessionStorage.getItem('user');
       if (savedUserStr) {
         const userObj = JSON.parse(savedUserStr);
-        // Kiểm tra chặt chẽ: chỉ khi role đúng là ADMIN mới set quyền, nếu không gán là null
-        if (userObj && userObj.role === 'ADMIN') {
+        // Kiểm tra linh hoạt role (chấp nhận cả 'ADMIN' hoặc 'admin')
+        if (userObj && userObj.role && userObj.role.toUpperCase() === 'ADMIN') {
           setUserRole('ADMIN');
         } else {
           setUserRole(null);
@@ -27,7 +27,7 @@ export default function Sidebar() {
       console.error('Lỗi đọc user từ sessionStorage:', e);
       setUserRole(null);
     }
-  }, []);
+   }, []);
 
   // Nếu đang ở trang đăng nhập thì không render Sidebar và Bottom Nav
   if (pathname === '/login') {
