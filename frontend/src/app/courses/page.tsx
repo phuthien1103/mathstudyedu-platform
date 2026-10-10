@@ -61,7 +61,7 @@ export default function CoursesPage() {
   }, [router]);
 
   const handleEnroll = async (courseId: string) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
     if (!token) {
       alert('Vui lòng đăng nhập để đăng ký môn học!');
       router.push('/login');
@@ -93,20 +93,20 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-8 pb-24">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8 pb-24">
       <main className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">Khóa học hiện có</h1>
-          <p className="mt-1 text-sm text-slate-400">Khám phá và đăng ký các khóa học chất lượng trên hệ thống</p>
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Khóa học hiện có</h1>
+          <p className="mt-1 text-sm text-slate-500">Khám phá và đăng ký các khóa học chất lượng trên hệ thống</p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-20 text-slate-400 gap-3">
-            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex justify-center items-center py-20 text-slate-500 gap-3">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <span>Đang tải danh sách khóa học...</span>
           </div>
         ) : courses.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-700 p-12 text-center text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-300 p-12 text-center text-slate-500 bg-white">
             Chưa có khóa học nào được xuất bản trên hệ thống.
           </div>
         ) : (
@@ -119,9 +119,9 @@ export default function CoursesPage() {
               return (
                 <div
                   key={course.id}
-                  className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-800/50 shadow-md hover:border-slate-700 transition-all hover:-translate-y-1"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-slate-300 transition-all hover:-translate-y-1"
                 >
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+                  <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
                     {course.thumbnailUrl ? (
                       <img
                         crossOrigin="anonymous"
@@ -130,28 +130,28 @@ export default function CoursesPage() {
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-500">
+                      <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
                         <BookOpen className="h-10 w-10 opacity-40" />
                       </div>
                     )}
                     {course.category && (
-                      <span className="absolute top-3 left-3 rounded-md bg-slate-900/80 px-2.5 py-1 text-xs font-medium text-blue-400 backdrop-blur-sm">
+                      <span className="absolute top-3 left-3 rounded-md bg-white/90 px-2.5 py-1 text-xs font-semibold text-blue-600 backdrop-blur-sm shadow-sm">
                         {course.category.name}
                       </span>
                     )}
                   </div>
 
                   <div className="flex flex-1 flex-col p-5">
-                    <h3 className="line-clamp-2 text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                    <h3 className="line-clamp-2 text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
                       {course.title}
                     </h3>
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-400 flex-1">
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600 flex-1">
                       {course.description || 'Chưa có mô tả chi tiết cho khóa học này.'}
                     </p>
 
-                    <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                      <span>Giảng viên: <strong className="text-slate-300">{course.instructor?.fullName || course.instructor?.name || 'Giảng viên'}</strong></span>
-                      <span className="font-semibold text-emerald-400">
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                      <span>Giảng viên: <strong className="text-slate-800">{course.instructor?.fullName || course.instructor?.name || 'Giảng viên'}</strong></span>
+                      <span className="font-semibold text-emerald-600">
                         {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString('vi-VN')} đ`}
                       </span>
                     </div>
@@ -159,23 +159,23 @@ export default function CoursesPage() {
                     {currentEnrollment?.status === 'ACTIVE' ? (
                       <button
                         disabled
-                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-medium flex items-center justify-center gap-2 cursor-default"
+                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium flex items-center justify-center gap-2 cursor-default text-sm"
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span>Bạn đã đăng ký thành công môn học</span>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        <span>Đã đăng ký thành công</span>
                       </button>
                     ) : currentEnrollment?.status === 'PENDING' ? (
                       <button
                         disabled
-                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium flex items-center justify-center gap-2 cursor-default"
+                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-medium flex items-center justify-center gap-2 cursor-default text-sm"
                       >
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-4 w-4 text-amber-600" />
                         <span>Đang chờ Admin xét duyệt</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => handleEnroll(course.id)}
-                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-medium text-white transition-colors"
+                        className="w-full mt-4 py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 font-medium text-white transition-colors text-sm shadow-sm"
                       >
                         Đăng ký môn học
                       </button>
