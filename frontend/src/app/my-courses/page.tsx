@@ -2,22 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, CheckCircle2, Clock } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock, Mail, Phone, User } from 'lucide-react';
 
-interface Course {
+interface MyCourseItem {
   id: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string | null;
-  price: number;
-  category?: { name: string };
-  instructor?: { name: string; fullName?: string };
+  status: 'PENDING' | 'ACTIVE' | 'CANCELLED';
+  enrolledAt: string;
+  course: {
+    id: string;
+    title: string;
+    description: string;
+    thumbnailUrl: string | null;
+    price: string | number;
+  };
 }
 
 export default function MyCoursesPage() {
   const router = useRouter();
-  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [list, setList] = useState<MyCourseItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState<{ email?: string; phone?: string; fullName?: string; name?: string }>({});
 
   useEffect(() => {
     const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
@@ -26,42 +30,35 @@ export default function MyCoursesPage() {
       return;
     }
 
+    try {
+      const userStr = sessionStorage.getItem('user');
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        setUserInfo(userObj);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     const fetchMyCourses = async () => {
       try {
-        const [resCourses, resEnroll] = await Promise.all([
-          fetch('https://mathstudyedu-api.onrender.com/api/courses', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('https://mathstudyedu-api.onrender.com/api/enrollments/my', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const res = await fetch('https://mathstudyedu-api.onrender.com/api/enrollments/my', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        let coursesList: Course[] = [];
-        let enrollmentsList: any[] = [];
-
-        if (resCourses.ok) {
-          const data = await resCourses.json();
-          coursesList = Array.isArray(data) ? data : (data.data || data.courses || []);
+        if (res.status === 401 || res.status === 403) {
+          router.replace('/login');
+          return;
         }
 
-        if (resEnroll.ok) {
-          const data = await resEnroll.json();
-          enrollmentsList = Array.isArray(data) ? data : (data.data || []);
+        const data = await res.json();
+        if (res.ok) {
+          if (Array.isArray(data)) setList(data);
+          else if (Array.isArray(data.data)) setList(data.data);
+          else setList([]);
         }
-
-        const myRegistered = enrollmentsList.map((enroll: any) => {
-          const courseId = enroll.courseId || enroll.course?.id;
-          const matchedCourse = coursesList.find((c) => c.id === courseId) || enroll.course;
-          return {
-            ...matchedCourse,
-            status: enroll.status,
-          };
-        }).filter((item: any) => item && item.title);
-
-        setEnrolledCourses(myRegistered);
-      } catch (err) {
-        console.error('Lỗi khi tải khóa học của tôi:', err);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -71,70 +68,94 @@ export default function MyCoursesPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-8 pb-24">
-      <main className="mx-auto max-w-7xl">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-3xl font-bold text-white">Khóa học của tôi</h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-400">Danh sách các khóa học bạn đã đăng ký trên hệ thống</p>
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8 pb-24">
+      <div className="max-w-7xl mx-auto">
+        {/* Header kèm phần hiển thị thông tin Email & Số điện thoại */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Khóa học của tôi</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Danh sách các môn học bạn đã đăng ký trên hệ thống
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-600" />
+              <span>Họ tên: <strong className="text-slate-900">{userInfo.fullName || userInfo.name || 'Học viên'}</strong></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-blue-600" />
+              <span>Email: <strong className="text-slate-900">{userInfo.email || 'Chưa cập nhật'}</strong></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-blue-600" />
+              <span>SĐT: <strong className="text-slate-900">{userInfo.phone || 'Chưa cập nhật'}</strong></span>
+            </div>
+          </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-20 text-slate-400 gap-3">
-            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex items-center justify-center py-20 text-slate-500 gap-3">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <span>Đang tải khóa học của bạn...</span>
           </div>
-        ) : enrolledCourses.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-700 p-12 text-center text-slate-400 text-sm">
-            Bạn chưa đăng ký khóa học nào. Hãy quay lại trang chủ để khám phá và đăng ký nhé!
+        ) : list.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-slate-300 rounded-2xl bg-white text-slate-500 shadow-sm">
+            Bạn chưa đăng ký khóa học nào. Hãy khám phá các khóa học ngay nhé!
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {enrolledCourses.map((course, index) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((item) => (
               <div
-                key={course.id || index}
-                className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-800/50 shadow-md hover:border-slate-700 transition-all hover:-translate-y-1"
+                key={item.id}
+                className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all"
               >
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-                  {course.thumbnailUrl ? (
+                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                  {item.course?.thumbnailUrl ? (
                     <img
                       crossOrigin="anonymous"
-                      src={course.thumbnailUrl}
-                      alt={course.title}
+                      src={item.course.thumbnailUrl}
+                      alt=""
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-500">
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
                       <BookOpen className="h-10 w-10 opacity-40" />
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-1 flex-col p-4 sm:p-5">
-                  <h3 className="line-clamp-2 text-base sm:text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
-                    {course.title}
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="line-clamp-2 text-lg font-semibold text-slate-900">
+                    {item.course?.title}
                   </h3>
-                  <p className="mt-1.5 line-clamp-2 text-xs sm:text-sm text-slate-400 flex-1">
-                    {course.description || 'Chưa có mô tả chi tiết cho khóa học này.'}
+                  <p className="mt-2 line-clamp-2 text-sm text-slate-600 flex-1">
+                    {item.course?.description || 'Khóa học trang bị kiến thức nền tảng và nâng cao.'}
                   </p>
 
-                  <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs sm:text-sm">
-                    <span className="text-slate-400 font-medium">Trạng thái:</span>
-                    {course.status === 'ACTIVE' ? (
-                      <span className="flex items-center gap-1 text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Đã kích hoạt
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-amber-300 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                        <Clock className="h-3.5 w-3.5" /> Chờ duyệt
-                      </span>
-                    )}
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span>Trạng thái:</span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        item.status === 'ACTIVE'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : item.status === 'PENDING'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      }`}
+                    >
+                      {item.status === 'ACTIVE' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      {item.status === 'PENDING' && <Clock className="w-3.5 h-3.5" />}
+                      {item.status === 'ACTIVE' ? 'Đã kích hoạt' : item.status === 'PENDING' ? 'Chờ duyệt' : 'Đã từ chối'}
+                    </span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
