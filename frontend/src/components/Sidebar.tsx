@@ -18,12 +18,18 @@ export default function Sidebar() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loadingChangePwd, setLoadingChangePwd] = useState(false);
 
+  // State quản lý form cập nhật số điện thoại
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [loadingPhone, setLoadingPhone] = useState(false);
+
   useEffect(() => {
     try {
       const savedUserStr = sessionStorage.getItem('user');
       if (savedUserStr) {
         const userObj = JSON.parse(savedUserStr);
         setUserData(userObj);
+        setNewPhone(userObj.phone || '');
         if (userObj && userObj.role && userObj.role.toUpperCase() === 'ADMIN') {
           setUserRole('ADMIN');
         } else {
@@ -75,6 +81,43 @@ export default function Sidebar() {
       alert('Không thể kết nối đến máy chủ.');
     } finally {
       setLoadingChangePwd(false);
+    }
+  };
+
+  const handleUpdatePhone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPhone.trim()) {
+      alert('Vui lòng nhập số điện thoại mới.');
+      return;
+    }
+
+    setLoadingPhone(true);
+    try {
+      const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
+      const res = await fetch('https://mathstudyedu-api.onrender.com/api/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ phone: newPhone })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('Cập nhật số điện thoại thành công!');
+        const updatedUser = { ...userData, phone: newPhone };
+        setUserData(updatedUser);
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+        setIsEditingPhone(false);
+      } else {
+        alert(data.message || 'Cập nhật số điện thoại thất bại.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Không thể kết nối đến máy chủ.');
+    } finally {
+      setLoadingPhone(false);
     }
   };
 
@@ -176,6 +219,7 @@ export default function Sidebar() {
             <button 
               onClick={() => {
                 setIsChangingPassword(false);
+                setIsEditingPhone(false);
                 setShowAccountModal(true);
               }}
               className="w-full flex items-center h-12 px-3 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 group text-left"
@@ -213,7 +257,7 @@ export default function Sidebar() {
          </div>
       </div>
 
-      {/* Modal thông tin tài khoản & đổi mật khẩu */}
+      {/* Modal thông tin tài khoản, đổi mật khẩu & cập nhật số điện thoại */}
       {showAccountModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
@@ -222,7 +266,7 @@ export default function Sidebar() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                {isChangingPassword ? 'Đổi mật khẩu' : 'Thông tin tài khoản'}
+                {isChangingPassword ? 'Đổi mật khẩu' : isEditingPhone ? 'Cập nhật số điện thoại' : 'Thông tin tài khoản'}
               </h3>
               <button 
                 onClick={() => setShowAccountModal(false)}
@@ -232,7 +276,7 @@ export default function Sidebar() {
               </button>
             </div>
 
-            {!isChangingPassword ? (
+            {!isChangingPassword && !isEditingPhone ? (
               <div className="space-y-4 text-sm">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Họ và tên</label>
@@ -250,8 +294,14 @@ export default function Sidebar() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại</label>
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900">
-                    {userData.phone || 'Chưa cập nhật'}
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 flex items-center justify-between">
+                    <span>{userData.phone || 'Chưa cập nhật'}</span>
+                    <button 
+                      onClick={() => setIsEditingPhone(true)}
+                      className="text-xs text-blue-600 font-semibold hover:underline"
+                    >
+                      Cập nhật
+                    </button>
                   </div>
                 </div>
 
@@ -277,7 +327,7 @@ export default function Sidebar() {
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : isChangingPassword ? (
               <form onSubmit={handleChangePassword} className="space-y-4 text-sm">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mật khẩu cũ</label>
@@ -329,6 +379,37 @@ export default function Sidebar() {
                     className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-colors shadow-sm disabled:opacity-50"
                   >
                     {loadingChangePwd ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleUpdatePhone} className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại mới</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nhập số điện thoại của bạn"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPhone(false)}
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition-colors"
+                  >
+                    Quay lại
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loadingPhone}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {loadingPhone ? 'Đang lưu...' : 'Lưu thay đổi'}
                   </button>
                 </div>
               </form>
