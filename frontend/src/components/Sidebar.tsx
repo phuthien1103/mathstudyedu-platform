@@ -59,7 +59,7 @@ export default function Sidebar() {
     setLoadingChangePwd(true);
     try {
       const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
-      const res = await fetch('https://mathstudyedu-api.onrender.com/api/auth/change-password', {
+      const res = await fetch('http://localhost:5000/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,30 +95,32 @@ export default function Sidebar() {
     try {
       const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
       
-      // Gửi ngầm lên backend (nếu API tồn tại)
-      try {
-        await fetch('https://mathstudyedu-api.onrender.com/api/users/profile', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ phone: newPhone })
-        });
-      } catch (apiErr) {
-        console.log('Lưu cục bộ vào sessionStorage');
-      }
+      // Gửi yêu cầu cập nhật lên Backend Localhost port 5000
+      const res = await fetch('http://localhost:5000/api/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ phone: newPhone })
+      });
 
-      // Cập nhật vào session storage và state hiển thị ngay lập tức
-      const updatedUser = { ...userData, phone: newPhone };
-      setUserData(updatedUser);
-      sessionStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      alert('Cập nhật số điện thoại thành công!');
-      setIsEditingPhone(false);
+      const data = await res.json();
+      if (res.ok) {
+        alert('Cập nhật số điện thoại lên máy chủ thành công!');
+        
+        // Cập nhật vào session storage và state hiển thị ngay lập tức
+        const updatedUser = { ...userData, phone: newPhone };
+        setUserData(updatedUser);
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        setIsEditingPhone(false);
+      } else {
+        alert(data.message || 'Cập nhật thất bại từ máy chủ.');
+      }
     } catch (err) {
       console.error(err);
-      alert('Có lỗi xảy ra khi lưu số điện thoại.');
+      alert('Không thể kết nối đến máy chủ localhost:5000.');
     } finally {
       setLoadingPhone(false);
     }
