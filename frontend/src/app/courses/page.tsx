@@ -21,7 +21,7 @@ export default function CoursesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
     if (!token) {
       router.replace('/login');
       return;

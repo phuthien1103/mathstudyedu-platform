@@ -23,14 +23,14 @@ export default function LoginPage() {
       // Lưu thông tin đăng nhập vào localStorage
       // Lưu thông tin đăng nhập vào localStorage
     const token = res.data.token || res.data.accessToken;
-    localStorage.setItem('token', token);
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('accessToken', token);
+    sessionStorage.setItem('user', JSON.stringify(res.data.user));
 
     // Chuyển hướng về trang chủ
     router.push('/');
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      sessionStorage.setItem('accessToken', res.data.accessToken);
+      sessionStorage.setItem('user', JSON.stringify(res.data.user));
 
       // Chuyển hướng về trang chủ
       router.push('/');

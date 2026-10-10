@@ -23,8 +23,8 @@ export default function HomePage() {
 
   // 1. Kiểm tra xác thực và tải dữ liệu môn học + đăng ký của học viên
   useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const savedUserStr = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
+    const savedUserStr = sessionStorage.getItem('user');
 
     if (!token || !savedUserStr) {
       router.replace('/login');

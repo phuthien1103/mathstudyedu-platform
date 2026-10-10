@@ -29,7 +29,7 @@ export default function AdminEnrollmentsPage() {
 
   const fetchEnrollments = async () => {
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
 
       if (!token) {
         alert('Vui lòng đăng nhập với tài khoản Quản trị viên!');

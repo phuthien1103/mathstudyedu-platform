@@ -11,7 +11,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     try {
-      const savedUserStr = localStorage.getItem('user');
+      const savedUserStr = sessionStorage.getItem('user');
       if (savedUserStr) {
         const userObj = JSON.parse(savedUserStr);
         // Kiểm tra chặt chẽ: chỉ khi role đúng là ADMIN mới set quyền, nếu không gán là null
@@ -24,7 +24,7 @@ export default function Sidebar() {
         setUserRole(null);
       }
     } catch (e) {
-      console.error('Lỗi đọc user từ localStorage:', e);
+      console.error('Lỗi đọc user từ sessionStorage:', e);
       setUserRole(null);
     }
   }, []);
@@ -129,9 +129,9 @@ export default function Sidebar() {
               className="flex items-center h-12 px-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 group" 
               href="/login"
               onClick={() => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('accessToken');
+                sessionStorage.removeItem('user');
               }}
             >
                 <div className="flex-shrink-0 flex items-center justify-center w-6 h-6">
@@ -189,9 +189,9 @@ export default function Sidebar() {
         <Link 
           href="/login" 
           onClick={() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('user');
           }}
           className="flex flex-col items-center justify-center text-red-400 hover:text-red-300"
         >
