@@ -5,6 +5,35 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+export async function updateProfile(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user?.id || (req as any).userId; 
+    const { phone } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Không tìm thấy thông tin xác thực người dùng.' });
+    }
+
+    const updatedUser = await prisma.user.update({
+  where: { id: userId },
+  data: { phone },
+  select: {
+    id: true,
+    fullName: true,
+    email: true,
+    phone: true,
+    role: true,
+  },
+});
+
+return res.json({
+  message: 'Cập nhật thành công',
+  user: updatedUser,
+});
+  } catch (error: any) {
+    return res.status(500).json({ message: 'Lỗi server khi cập nhật', error: error.message });
+  }
+}
 
 // 1. Đăng ký tài khoản
 export const register = async (req: Request, res: Response) => {
@@ -85,7 +114,7 @@ export const login = async (req: Request, res: Response) => {
     email: user.email,
     role: user.role,
   },
-  process.env.JWT_SECRET || 'secret_key', // Đảm bảo secret này khớp y hệt middleware
+  JWT_SECRET,
   { expiresIn: '7d' }
 );
 

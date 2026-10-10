@@ -55,6 +55,36 @@ export default function Sidebar() {
       alert('Vui lòng điền đầy đủ thông tin mật khẩu cũ và mới.');
       return;
     }
+    const [phone, setPhone] = useState('');
+const [loadingPhone, setLoadingPhone] = useState(false);
+
+const handleUpdatePhone = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoadingPhone(true);
+  try {
+    const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
+    const res = await fetch('http://localhost:5000/api/auth/profile', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ phone })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('Cập nhật số điện thoại thành công!');
+    } else {
+      alert(data.message || 'Cập nhật thất bại.');
+    }
+  } catch (error) {
+    console.error('Lỗi:', error);
+    alert('Không thể kết nối đến server.');
+  } finally {
+    setLoadingPhone(false);
+  }
+};
 
     setLoadingChangePwd(true);
     try {
@@ -96,14 +126,14 @@ export default function Sidebar() {
       const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
       
       // Gửi yêu cầu cập nhật lên Backend Localhost port 5000
-      const res = await fetch('http://localhost:5000/api/users/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ phone: newPhone })
-      });
+      const res = await fetch('https://mathstudyedu-api.onrender.com/api/auth/profile', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({ phone: newPhone })
+});
 
       const data = await res.json();
       if (res.ok) {
