@@ -82,7 +82,7 @@ export default function HomePage() {
               Nền tảng học tập trực tuyến hàng đầu
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Chào mừng <span className="text-blue-600">{userName}</span> trở lại OpenEdu!
+                              Chào mừng {userName} trở lại OpenEdu!
             </h1>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl">
               Khám phá các lộ trình ôn tập kiến thức trọng tâm, rèn luyện tư duy và chinh phục mọi cột mốc học tập với chất lượng tốt nhất.
