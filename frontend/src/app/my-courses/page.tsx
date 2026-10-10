@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, CheckCircle2, Clock, Mail, Phone, User } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock } from 'lucide-react';
 
 interface MyCourseItem {
   id: string;
@@ -21,23 +21,12 @@ export default function MyCoursesPage() {
   const router = useRouter();
   const [list, setList] = useState<MyCourseItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userInfo, setUserInfo] = useState<{ email?: string; phone?: string; fullName?: string; name?: string }>({});
 
   useEffect(() => {
     const token = sessionStorage.getItem('token') || sessionStorage.getItem('accessToken');
     if (!token) {
       router.replace('/login');
       return;
-    }
-
-    try {
-      const userStr = sessionStorage.getItem('user');
-      if (userStr) {
-        const userObj = JSON.parse(userStr);
-        setUserInfo(userObj);
-      }
-    } catch (e) {
-      console.error(e);
     }
 
     const fetchMyCourses = async () => {
@@ -70,29 +59,11 @@ export default function MyCoursesPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8 pb-24">
       <div className="max-w-7xl mx-auto">
-        {/* Header kèm phần hiển thị thông tin Email & Số điện thoại */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Khóa học của tôi</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Danh sách các môn học bạn đã đăng ký trên hệ thống
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-600" />
-              <span>Họ tên: <strong className="text-slate-900">{userInfo.fullName || userInfo.name || 'Học viên'}</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-blue-600" />
-              <span>Email: <strong className="text-slate-900">{userInfo.email || 'Chưa cập nhật'}</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-blue-600" />
-              <span>SĐT: <strong className="text-slate-900">{userInfo.phone || 'Chưa cập nhật'}</strong></span>
-            </div>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Khóa học của tôi</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Danh sách các môn học bạn đã đăng ký trên hệ thống
+          </p>
         </div>
 
         {loading ? (
